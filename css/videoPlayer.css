@@ -40,10 +40,10 @@ video {
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    z-index: 4;
+    z-index: 5;
     background: url('/img/dot.png') center center no-repeat;
 }
-.anot {
+.annots {
     position: absolute;
     width: 100%;
     height: 12px;
@@ -54,6 +54,18 @@ video {
     transform: translateY(-50%);
     z-index: 4;
 }
+.annots div {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: 50%;
+    background: url('/img/star.png') center center no-repeat;
+    cursor: pointer;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
 .progressBarIn {
     position: absolute;
     width: 0%;

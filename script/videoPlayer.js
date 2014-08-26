@@ -10,22 +10,31 @@ var Player = function (input) {
         }
     */
 
+    // process input data
+    this.element = input.element;
+    this.annots = input.annotations;
+    this.width = input.width;
+
+    // create player template
     playerTemplate = this.template(input.src.mp4, input.src.webm, input.src.ogv)
 
+    // write template to the doc
     this.playerBox = document.getElementById(input.element);
-
     this.playerBox.innerHTML = playerTemplate;
 
-
-
+    // select player elements
     this.video = this.playerBox.getElementsByTagName('video')[0];
     this.videoPlay = this.playerBox.getElementsByClassName('playButton')[0];
     this.videoBg = this.playerBox.getElementsByClassName('playBg')[0];
     
+    // setting player
     this.addEvents();
+    this.cssStyle();
+};
 
-    this.playerBox.style.width = input.width + 'px';
-    this.video.style.width = input.width + 'px';
+Player.prototype.cssStyle = function () {
+    this.playerBox.style.width = this.width + 'px';
+    this.video.style.width = this.width + 'px';
 };
 
 Player.prototype.template = function (mp4, webm, ogv) {
@@ -47,14 +56,38 @@ Player.prototype.template = function (mp4, webm, ogv) {
                 '<div class="ProgressBarLoad"></div>' +
                 '<div class="progressBarBase"></div>' +
                 '<div class="dot"></div>' +
-                '<div class="anot"></div>' +
+                '<div class="annots"></div>' +
             '</div>' +
         '</div>';
     return playerTemplate;
 };
 
-Player.prototype.annotations = function (annot) {
+Player.prototype.annotations = function () {
+    var a, seconds, totalTime, position, annotElement, annotsDots;
+
+    this.annots.forEach( function (e) {
+        // calculate time to seconds        
+        a = e.time.split(':');
+        seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
+        totalTime = this.video.duration;
+
+        position = (seconds / totalTime) * 100;
+
+        annotElement = this.playerBox.getElementsByClassName('annots')[0];
+        annotElement.innerHTML = annotElement.innerHTML + '<div class="annotsDots" time="' + seconds + '" style="left: ' + position + '%;"></div>';
+    }, this);
     
+    annotsDots = this.playerBox.getElementsByClassName('annots')[0];
+    annotsDots.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
+    
+};
+
+Player.prototype.playBackPosition = function (e) {
+    var timePlayBack;
+    if (e.target !== e.currentTarget) {  // clicked on the annots dot
+        timePlayBack = e.target.getAttribute('time');
+        this.video.currentTime = timePlayBack;
+    }
 };
 
 Player.prototype.addEvents = function () {
@@ -63,6 +96,14 @@ Player.prototype.addEvents = function () {
     this.videoBg.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
     this.video.addEventListener('timeupdate', (function (_this) { return function () { _this.progressBar(); }; })(this));
     this.video.addEventListener('progress', (function (_this) { return function () { _this.loadProgress(); }; })(this));
+
+    this.video.addEventListener('loadedmetadata', ( 
+        function (_this) { 
+            return function () { 
+                _this.annotations();
+            }; 
+        })(this)
+    );
 };
 
 Player.prototype.playPause = function () {

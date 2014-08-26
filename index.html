@@ -22,12 +22,16 @@ document.addEventListener('DOMContentLoaded', function () {
             webm: '/videos/trailer.webm',
             ogv:  '/videos/trailer.ogv'
         },
-        annotations: {
-            annotation: {
-                time: '00.00.10',
+        annotations: [
+            {
+                time: '00:00:10',
                 description: 'Ahoj video'
+            },
+            {
+                time: '00:00:20',
+                description: 'hehehe'
             }
-        }
+        ]
     });
 });
 
