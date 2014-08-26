@@ -83,11 +83,18 @@ Player.prototype.annotations = function () {
 };
 
 Player.prototype.playBackPosition = function (e) {
-    var timePlayBack;
+    var timePlayBack, page;
     if (e.target !== e.currentTarget) {  // clicked on the annots dot
         timePlayBack = e.target.getAttribute('time');
         this.video.currentTime = timePlayBack;
+        page = 'video-' + this.element + '-' + timePlayBack;
+        console.log(page);
+        window.history.replaceState({p: page}, '', page);
     }
+};
+
+Player.prototype.annotOver = function () {
+
 };
 
 Player.prototype.addEvents = function () {
@@ -101,9 +108,21 @@ Player.prototype.addEvents = function () {
         function (_this) { 
             return function () { 
                 _this.annotations();
+                _this.checkUrl();
             }; 
         })(this)
     );
+};
+
+Player.prototype.checkUrl = function () {
+    var url, parsed, time;
+    url = window.location.pathname;
+    parsed = url.split("/");
+    parsed = parsed.pop().split("-");
+    if (parsed[1] == this.element) {
+        time = parseInt(parsed[2]);
+        this.video.currentTime = time;
+    }
 };
 
 Player.prototype.playPause = function () {
