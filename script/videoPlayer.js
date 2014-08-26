@@ -33,6 +33,7 @@ var Player = function (input) {
 };
 
 Player.prototype.cssStyle = function () {
+    this.playerBox.style.position = 'relative';
     this.playerBox.style.width = this.width + 'px';
     this.video.style.width = this.width + 'px';
 };
@@ -58,12 +59,16 @@ Player.prototype.template = function (mp4, webm, ogv) {
                 '<div class="dot"></div>' +
                 '<div class="annots"></div>' +
             '</div>' +
-        '</div>';
+            '<div class="annoutsBoxes"></div>' +
+        '</div>' +
+        '<canvas id="canvasid" width="100" height="100"></canvas>';
     return playerTemplate;
 };
 
 Player.prototype.annotations = function () {
-    var a, seconds, totalTime, position, annotElement, annotsDots;
+    var a, seconds, totalTime, position, annotElement, annotsDots, annotBoxes, oneAnnotDes;
+    
+    annotBoxes = this.playerBox.getElementsByClassName('annoutsBoxes')[0];
 
     this.annots.forEach( function (e) {
         // calculate time to seconds        
@@ -75,26 +80,48 @@ Player.prototype.annotations = function () {
 
         annotElement = this.playerBox.getElementsByClassName('annots')[0];
         annotElement.innerHTML = annotElement.innerHTML + '<div class="annotsDots" time="' + seconds + '" style="left: ' + position + '%;"></div>';
+
+        annotBoxes.innerHTML += '<div id="' + this.element + '-' + seconds + '" style="left: ' + position + '%">' + e.description + '</div>';
     }, this);
     
     annotsDots = this.playerBox.getElementsByClassName('annots')[0];
     annotsDots.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
-    
+    annotsDots.addEventListener('mouseover', (function (_this) { return function (e) { _this.annotOver(e); }; })(this));
+    annotsDots.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));    
 };
 
 Player.prototype.playBackPosition = function (e) {
-    var timePlayBack, page;
+    var timePlayBack, url;
     if (e.target !== e.currentTarget) {  // clicked on the annots dot
         timePlayBack = e.target.getAttribute('time');
         this.video.currentTime = timePlayBack;
-        page = 'video-' + this.element + '-' + timePlayBack;
-        console.log(page);
-        window.history.replaceState({p: page}, '', page);
+        url = 'video-' + this.element + '-' + timePlayBack;
+        window.history.replaceState({p: url}, '', url);
     }
 };
 
-Player.prototype.annotOver = function () {
+Player.prototype.annotOver = function (e) {
+    var timePlayBack, boxId, annotsBox;
+    if (e.target !== e.currentTarget) {
+        timePlayBack = e.target.getAttribute('time');
+        
+        boxId = this.element + '-' + timePlayBack;
+        
+        annotsBox = document.getElementById(boxId);
+        annotsBox.style.display = 'block';
+    }
+};
 
+Player.prototype.annotOut = function (e) {
+    var timePlayBack, boxId, annotsBox;
+    if (e.target !== e.currentTarget) {
+        timePlayBack = e.target.getAttribute('time');
+        
+        boxId = this.element + '-' + timePlayBack;
+        
+        annotsBox = document.getElementById(boxId);
+        annotsBox.style.display = 'none';
+    }
 };
 
 Player.prototype.addEvents = function () {
@@ -155,5 +182,3 @@ Player.prototype.progressBar = function () {
     dot.style.left = actualPos + '%';
 
 };
-
-
