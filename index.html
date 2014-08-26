@@ -9,20 +9,29 @@
 
 <body>
 <div id="content">
-    <div id="video_1">
-        <div class="videoBox">
-            <video>
-                <source src="/videos/trailer.mp4" type="video/mp4">
-                <source src="/videos/trailer.webm" type="video/webm">
-                <source src="/videos/trailer.ogv" type="video/ogg">
-                Your browser does not support the video player.
-            </video>
-            <div class="playButton"></div>
-            <div class="playBg"></div>
-        </div>
-        <div class="control"></div>
-    </div>
+    <div id="video_1"></div>
 </div>
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    var player = new Player({
+        element: 'video_1', 
+        width: 500,
+        src: {
+            mp4:  '/videos/trailer.mp4',
+            webm: '/videos/trailer.webm',
+            ogv:  '/videos/trailer.ogv'
+        },
+        annotations: {
+            annotation: {
+                time: '00.00.10',
+                description: 'Ahoj video'
+            }
+        }
+    });
+});
+
+</script>
 </body>
 
 </html>
