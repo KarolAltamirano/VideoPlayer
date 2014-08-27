@@ -47,9 +47,13 @@ var Player = function (input) {
     this.element = input.element;
     this.annots = input.annotations;
     this.width = input.width;
+    
+    this.mp4  = input.src.mp4;
+    this.webm = input.src.webm;
+    this.ogv  = input.src.ogv;
 
     // create player template
-    playerTemplate = this.template(input.src.mp4, input.src.webm, input.src.ogv);
+    playerTemplate = this.template(this.mp4, this.webm, this.ogv);
 
     // write template to the page
     this.playerBox = document.getElementById(input.element);
@@ -72,18 +76,20 @@ Player.prototype.cssStyle = function () {
 };
 
 Player.prototype.template = function (mp4, webm, ogv) {
-    var playerTemplate;
+    var playerTemplate, timeStamp;
+
+    timeStamp = new Date().getTime();
     playerTemplate =
         '<div class="VP_videoBox">' +
             '<video>' +
-                (mp4  !== undefined ? '<source src="' + mp4  + '" type="video/mp4">'  : '') +
-                (webm !== undefined ? '<source src="' + webm + '" type="video/webm">' : '') +
-                (ogv  !== undefined ? '<source src="' + ogv  + '" type="video/ogg">'  : '') +
+                (mp4  !== undefined ? '<source src="' + mp4  + '?' + timeStamp + '" type="video/mp4">'  : '') +
+                (webm !== undefined ? '<source src="' + webm + '?' + timeStamp + '" type="video/webm">' : '') +
+                (ogv  !== undefined ? '<source src="' + ogv  + '?' + timeStamp + '" type="video/ogg">'  : '') +
                 'Your browser does not support the video player.' +
             '</video>' +
             '<div class="VP_playButton"></div>' +
             '<div class="VP_playBg"></div>' +
-            '<div class="VP_fadeVideo"></div>' +
+            '<div class="VP_fadeVideo"><span>Loading ...</span></div>' +
         '</div>' +
         '<div class="VP_control">' +
             '<div class="VP_progressBar">' +
@@ -104,7 +110,8 @@ Player.prototype.annotations = function () {
         totalTime,      // total duration of the video
         position,       // position of the hotspot in % on timeline
         annotElement,   // parent element of all hotspots on timeline
-        annotBoxes;     // parent element of all annotations
+        annotBoxes,     // parent element of all annotations
+        cloneVideo;
     
     annotElement = this.playerBox.getElementsByClassName('VP_annots')[0];
     annotBoxes = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0];
@@ -130,23 +137,22 @@ Player.prototype.annotations = function () {
     
     annotElement.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
     annotElement.addEventListener('mouseover', (function (_this) { return function (e) { _this.annotOver(e); }; })(this));
-    annotElement.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));    
+    annotElement.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));
 
     // clone video element and generate thumbnails
-    cloneVideo = this.createCopyVideo();
+    cloneVideo = this.createCopyVideo(this.mp4, this.webm, this.ogv);    
     cloneVideo.load();
-
-    cloneVideo.addEventListener('loadedmetadata', ( function (_this) { return function () { 
-            _this.showThumbs(cloneVideo, 0);
+    cloneVideo.addEventListener('loadeddata', ( function (_this) { return function () { 
+            _this.showThumbs(cloneVideo, 0, true);
         }; })(this) 
     );
 };
 
-Player.prototype.showThumbs = function (cloneVideo, counter) {
+Player.prototype.showThumbs = function (cloneVideo, counter, repeat) {
     var maxCounter,
         annotBoxes,
         that;
-
+    
     maxCounter = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0].getElementsByTagName('div').length;
 
     if (counter >= maxCounter) {
@@ -156,20 +162,30 @@ Player.prototype.showThumbs = function (cloneVideo, counter) {
 
     annotBoxes = this.playerBox.getElementsByClassName('VP_annotsOneBox')[counter];
     cloneVideo.currentTime = annotBoxes.getAttribute('time');
-
     that = this;
+
     $(cloneVideo).on('seeked', function () {
         $(cloneVideo).off('seeked');
         that.captureImage(cloneVideo, annotBoxes);
-        counter++;
-        that.showThumbs(cloneVideo, counter);
+        if (!repeat) // safari fix
+            counter++;
+
+        that.showThumbs(cloneVideo, counter, false);
     });
+
 };
 
-Player.prototype.createCopyVideo = function () {
+Player.prototype.createCopyVideo = function (mp4, webm, ogv) {
     var video;
 
-    video = this.video.cloneNode(true);
+    video = document.createElement('video');
+    timeStamp = new Date().getTime();
+
+    video.innerHTML = 
+        (mp4  !== undefined ? '<source src="' + mp4  + '?' + timeStamp + '" type="video/mp4">'  : '') +
+        (webm !== undefined ? '<source src="' + webm + '?' + timeStamp + '" type="video/webm">' : '') +
+        (ogv  !== undefined ? '<source src="' + ogv  + '?' + timeStamp + '" type="video/ogg">'  : '');
+
     return video;
 };
 
@@ -205,14 +221,14 @@ Player.prototype.changeCurrentTime = function (time, fade) {
         that = this;
         $(this.video).animate({volume: 0}, 200);
 
-        $(fadeBox).fadeIn(200, function () { 
+        $(fadeBox).stop().fadeIn(200, function () { 
             that.video.currentTime = time;
             $(that.video).on('seeked', function () {
-                $(fadeBox).fadeOut(500);
+                $(fadeBox).stop().fadeOut(500);
                 $(that.video).animate({volume: 1}, 1000);
                 $(that.video).off('seeked');
             });
-        });
+        });     
     } else {
         this.video.currentTime = time;
     }
@@ -220,7 +236,9 @@ Player.prototype.changeCurrentTime = function (time, fade) {
 
 Player.prototype.playBackPosition = function (e) {
 
-    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that, clickPosition, totalWidth, currentPosPerc;
+    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that, clickPosition, totalWidth, currentPosPerc, videoLength,
+        newVideoPos;
+    
     if (e.target !== e.currentTarget) {  // clicked on the hotspot dot
         // add transition to time bar
 
@@ -254,7 +272,8 @@ Player.prototype.playBackPosition = function (e) {
         currentPosPerc = (100 / totalWidth) * clickPosition;
         videoLength = this.video.duration
         newVideoPos = (videoLength / 100) * currentPosPerc;
-
+        //this.video.currentTime = newVideoPos;
+        console.log('click:' + newVideoPos);
         this.changeCurrentTime(newVideoPos, true);
     } 
 };
@@ -262,7 +281,7 @@ Player.prototype.playBackPosition = function (e) {
 Player.prototype.checkUrl = function () {
     var url, parsed, time;
 
-     if (this.useHash) { // used hash in url
+    if (this.useHash) { // used hash in url
         url = window.location.hash;
         parsed = url.split('-');
         if (parsed[0] == '#vpvideo') {
@@ -292,7 +311,7 @@ Player.prototype.annotOver = function (e) {
         boxId = 'VP_' + this.element + '-' + timePlayBack;
         
         annotsBox = document.getElementById(boxId);
-        $(annotsBox).fadeIn();
+        $(annotsBox).stop().fadeIn();
     }
 };
 
@@ -304,7 +323,7 @@ Player.prototype.annotOut = function (e) {
         boxId = 'VP_' + this.element + '-' + timePlayBack;
         
         annotsBox = document.getElementById(boxId);
-        $(annotsBox).fadeOut();
+        $(annotsBox).stop().fadeOut();
     }
 };
 
@@ -326,13 +345,13 @@ Player.prototype.addEvents = function () {
 
 Player.prototype.playPause = function () {
     if(this.video.paused) {
-        $(this.videoPlay).fadeOut();
-        $(this.videoBg).fadeOut();
+        $(this.videoPlay).stop().fadeOut();
+        $(this.videoBg).stop().fadeOut();
         this.video.play();
     }
     else {
-        $(this.videoPlay).fadeIn();
-        $(this.videoBg).fadeIn();
+        $(this.videoPlay).stop().fadeIn();
+        $(this.videoBg).stop().fadeIn();
         this.video.pause();
     }
 };
@@ -361,8 +380,8 @@ Player.prototype.progressBar = function () {
 };
 
 Player.prototype.onVideoEnd = function () {
-    $(this.videoPlay).fadeIn();
-    $(this.videoBg).fadeIn();
+    $(this.videoPlay).stop().fadeIn();
+    $(this.videoBg).stop().fadeIn();
     this.changeCurrentTime(0, true);
     this.video.pause();
 };

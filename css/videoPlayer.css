@@ -35,6 +35,20 @@ video {
     background: #000;
     z-index: 4;
     display: none;
+    color: #fff;
+}
+.VP_fadeVideo span {
+    position: relative;
+    display: block;
+    width:200px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: sans-serif;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    font-size: 1em;
 }
 .VP_progressBar {
     position: relative;
@@ -130,7 +144,7 @@ video {
 .VP_annoutsBoxes div {
     position: absolute;
     bottom: 40px;
-    background: #fff;
+    background: url('/img/whitepx.png') left top repeat;
     padding: 10px;
     display: none;
     z-index: 10;
