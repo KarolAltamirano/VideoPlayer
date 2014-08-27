@@ -143,9 +143,6 @@ Player.prototype.showThumbs = function (counter) {
 
     maxCounter = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0].getElementsByTagName('div').length;
 
-    console.log("max: " + maxCounter);
-    console.log("counter: " + counter);
-
     if (counter >= maxCounter) {
         this.video.currentTime = 0;
         return;
@@ -175,35 +172,49 @@ Player.prototype.captureImage = function (video, element) {
     $(element).children('span').html(img);
 };
 
-Player.prototype.playBackPosition = function (e) {
-    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that;
-    if (e.target !== e.currentTarget) {  // clicked on the annots dot
-        // add transition to time bar
-        dot = this.playerBox.getElementsByClassName('VP_dot')[0];
-        bar = this.playerBox.getElementsByClassName('VP_progressBarIn')[0];
-        $(dot).addClass('VP_transition');
-        dot.addEventListener('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
-            $(dot).removeClass('VP_transition');
-        });
+Player.prototype.changeCurrentTime = function (time, fade) {
+    var fadeBox, that, dot, bar;
 
-        $(bar).addClass('VP_transition');
-        bar.addEventListener('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
-            $(bar).removeClass('VP_transition');
-        });
+    dot = this.playerBox.getElementsByClassName('VP_dot')[0];
+    bar = this.playerBox.getElementsByClassName('VP_progressBarIn')[0];
+    $(dot).addClass('VP_transition');
+    $(dot).on('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
+        $(dot).removeClass('VP_transition');
+    });
 
-        timePlayBack = e.target.getAttribute('time');
+    $(bar).addClass('VP_transition');
+    $(bar).on('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
+        $(bar).removeClass('VP_transition');
+    });
 
+    if (fade == true) {
         fadeBox = this.playerBox.getElementsByClassName('VP_fadeVideo')[0];
         
         that = this;
         $(this.video).animate({volume: 0}, 200);
-        this.video.currentTime = timePlayBack;
+
         $(fadeBox).fadeIn(200, function () { 
+            that.video.currentTime = time;
             $(that.video).on('seeked', function () {
                 $(fadeBox).fadeOut(500);
                 $(that.video).animate({volume: 1}, 1000);
+                $(that.video).off('seeked');
             });
         });
+    } else {
+        this.video.currentTime = time;
+    }
+};
+
+Player.prototype.playBackPosition = function (e) {
+
+    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that, clickPosition, totalWidth, currentPosPerc;
+    if (e.target !== e.currentTarget) {  // clicked on the hotspot dot
+        // add transition to time bar
+
+        timePlayBack = e.target.getAttribute('time');
+
+        this.changeCurrentTime(timePlayBack, true);
 
         // check and change url
         if (this.useHash) { // used hash in url
@@ -225,7 +236,15 @@ Player.prototype.playBackPosition = function (e) {
         }
 
         window.history.replaceState({p: url}, '', url);
-    }
+    } else { // click on the progress bar
+        clickPosition = e.pageX - $(e.currentTarget).offset().left;
+        totalWidth = $(e.currentTarget).width();
+        currentPosPerc = (100 / totalWidth) * clickPosition;
+        videoLength = this.video.duration
+        newVideoPos = (videoLength / 100) * currentPosPerc;
+
+        this.changeCurrentTime(newVideoPos, true);
+    } 
 };
 
 Player.prototype.checkUrl = function () {
@@ -289,6 +308,8 @@ Player.prototype.addEvents = function () {
             _this.checkUrl();
         }; })(this) 
     );
+
+    this.video.addEventListener('ended', (function (_this) { return function () { _this.onVideoEnd(); }; })(this));
 };
 
 Player.prototype.playPause = function () {
@@ -320,4 +341,10 @@ Player.prototype.progressBar = function () {
     bar.style.width = actualPos + '%';
     dot.style.left = actualPos + '%';
 
+};
+
+Player.prototype.onVideoEnd = function () {
+    $(this.videoPlay).fadeIn();
+    $(this.videoBg).fadeIn();
+    this.changeCurrentTime(0, true);
 };
