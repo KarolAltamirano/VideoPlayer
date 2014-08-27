@@ -14,7 +14,7 @@ video {
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     z-index: 3;
-    background: url('/img/play.png') center center no-repeat;
+    background: url('../img/play.png') center center no-repeat;
     cursor: pointer;
 }
 .VP_playBg {
@@ -23,7 +23,7 @@ video {
     height: 100%;
     top: 0;
     left: 0;
-    background: url('/img/bg.png') left top repeat;
+    background: url('../img/bg.png') left top repeat;
     cursor: pointer;
 }
 .VP_fadeVideo {
@@ -65,7 +65,7 @@ video {
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     z-index: 4;
-    background: url('/img/dot.png') center center no-repeat;
+    background: url('../img/dot.png') center center no-repeat;
 }
 .VP_annots {
     position: absolute;
@@ -83,7 +83,7 @@ video {
     width: 12px;
     height: 12px;
     top: 50%;
-    background: url('/img/star.png') center center no-repeat;
+    background: url('../img/star.png') center center no-repeat;
     cursor: pointer;
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
@@ -144,7 +144,7 @@ video {
 .VP_annoutsBoxes div {
     position: absolute;
     bottom: 40px;
-    background: url('/img/whitepx.png') left top repeat;
+    background: url('../img/whitepx.png') left top repeat;
     padding: 10px;
     display: none;
     z-index: 10;

@@ -12,11 +12,11 @@
  * Player is global variable to create and manage the player                           *
  *  input =                                                                            *
  *      {                                                                              *
- *          element:     string,                                                       *
- *          width:       number,                                                       *
- *          src:         { mp4: string, webm: string, ogv: string},                    *
- *          annotations: { annotation: { time: string, description: string } },        *
- *          useHash:     boolean                                                       *
+ *          element:     string, // main element where the player will be placed       *
+ *          width:       number, // widt of the player                                 *
+ *          src:         { mp4: string, webm: string, ogv: string}, // src to videos   *
+ *          annotations: [ { time: string, description: string }, { ... }, ... ],      *
+ *          useHash:     boolean // use hash in url or no, true / false                *
  *      }                                                                              *
  *                                                                                     *
  ***************************************************************************************/
@@ -33,11 +33,11 @@ var Player = function (input) {
         return false;
     }
     if (input.src.mp4 === undefined && input.src.webm === undefined && input.src.ogv === undefined) {
-        console.log('Error: set video src variable');
+        console.log('Error: set video src variables');
         return false;
     }
 
-    // set variables after the test
+    // set variables after the test was passed
     if (input.useHash === true) {
         this.useHash = true;
     } else {
@@ -69,14 +69,47 @@ var Player = function (input) {
     this.cssStyle();
 };
 
+/***********************************************************************
+ * addEvents - event to video, play button, background of play button  *
+ ***********************************************************************/
+
+Player.prototype.addEvents = function () {
+    // play video by clicking on the video
+    this.video.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
+    // play video by clicking on play button 
+    this.videoPlay.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
+    // play video by clicking on play button faded background
+    this.videoBg.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
+    // move progressbar on video time update
+    this.video.addEventListener('timeupdate', (function (_this) { return function () { _this.progressBar(); }; })(this));
+    // move progress loading bar on video load
+    this.video.addEventListener('progress', (function (_this) { return function () { _this.loadProgress(); }; })(this));
+    // render annotations hotspots and video thumbnails when video is ready, rewind video according to url
+    this.video.addEventListener('loadedmetadata', ( function (_this) { return function () { 
+        _this.annotations();
+        _this.checkUrl();
+    }; })(this) );
+    // rewind video on beginning when video ends
+    this.video.addEventListener('ended', (function (_this) { return function () { _this.onVideoEnd(); }; })(this));
+};
+
+/***********************************************************************
+ * cssStyle - set width of the video and video container element       *
+ ***********************************************************************/
+
 Player.prototype.cssStyle = function () {
     this.playerBox.style.position = 'relative';
     this.playerBox.style.width = this.width + 'px';
     this.video.style.width = this.width + 'px';
 };
 
+/***********************************************************************
+ * template - template of video player                                 *
+ ***********************************************************************/
+
 Player.prototype.template = function (mp4, webm, ogv) {
-    var playerTemplate, timeStamp;
+    var playerTemplate,  // 
+        timeStamp;       // time stamp to disable cache 
 
     timeStamp = new Date().getTime();
     playerTemplate =
@@ -104,6 +137,11 @@ Player.prototype.template = function (mp4, webm, ogv) {
     return playerTemplate;
 };
 
+/***********************************************************************
+ * annotations - create highspots on progressbar and create annotation *
+ *               boxes with description and thumbnails                 *
+ ***********************************************************************/
+
 Player.prototype.annotations = function () {
     var a,              // splited time in format hh:mm:ss to the array
         seconds,        // position of the hotspon in seconds
@@ -111,30 +149,39 @@ Player.prototype.annotations = function () {
         position,       // position of the hotspot in % on timeline
         annotElement,   // parent element of all hotspots on timeline
         annotBoxes,     // parent element of all annotations
-        cloneVideo;
+        cloneVideo;     // cloned video for thumbnails generation 
     
     annotElement = this.playerBox.getElementsByClassName('VP_annots')[0];
     annotBoxes = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0];
 
-    this.annots.forEach( function (e) {
-        // calculate time to seconds        
-        a = e.time.split(':');
-        seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
-        totalTime = this.video.duration;
+    if (this.annots !== undefined && Array.isArray(this.annots)) {
+        this.annots.forEach( function (e) {
+            // calculate time to seconds        
+            a = e.time.split(':');
+            seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
+            totalTime = this.video.duration;
 
-        position = (seconds / totalTime) * 100;
+            position = (seconds / totalTime) * 100;
 
-        annotElement.innerHTML += 
-            '<div class="VP_annotsDots" time="' + seconds + '" style="left: ' + position + '%;"></div>';
-    
-        annotBoxes.innerHTML += 
-            '<div class="VP_annotsOneBox" id="VP_' + this.element + '-' + seconds + '" style="left: ' + (position - 1.5) + '%" time="' + seconds + '">' + 
-                '<span></span>' +
-                '<hr>' +
-                e.description + 
-            '</div>';
-    }, this);
-    
+            if (position >= 0 && position <= 100) { // do not show hotspot whose tiem is bigger than video duration
+                // render hotspot on progress bar
+                annotElement.innerHTML += 
+                    '<div class="VP_annotsDots" time="' + seconds + '" style="left: ' + position + '%;"></div>';
+            
+                // render info box for hotspot with description and thumbnail
+                annotBoxes.innerHTML += 
+                    '<div class="VP_annotsOneBox" id="VP_' + this.element + '-' + seconds + '" style="left: ' + (position - 1.5) + '%" ' +
+                        'time="' + seconds + '">' + 
+                        '<span></span>' +
+                        '<hr>' +
+                        e.description + 
+                    '</div>';
+            } else {
+                console.log('Error: Hotspot set on wrong time, time:' + e.time);
+            }
+        }, this);
+    }
+    // events for rewinding video to hotspot, events to show / hide hotspot
     annotElement.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
     annotElement.addEventListener('mouseover', (function (_this) { return function (e) { _this.annotOver(e); }; })(this));
     annotElement.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));
@@ -148,10 +195,14 @@ Player.prototype.annotations = function () {
     );
 };
 
+/***********************************************************************
+ * showThumbs - generate thumbnails                                    *
+ ***********************************************************************/
+
 Player.prototype.showThumbs = function (cloneVideo, counter, repeat) {
-    var maxCounter,
-        annotBoxes,
-        that;
+    var maxCounter, // number of hotspots
+        annotBoxes, // element of one annotation
+        that;       // use to address "this" in callback function
     
     maxCounter = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0].getElementsByTagName('div').length;
 
@@ -162,18 +213,22 @@ Player.prototype.showThumbs = function (cloneVideo, counter, repeat) {
 
     annotBoxes = this.playerBox.getElementsByClassName('VP_annotsOneBox')[counter];
     cloneVideo.currentTime = annotBoxes.getAttribute('time');
+    
     that = this;
-
     $(cloneVideo).on('seeked', function () {
         $(cloneVideo).off('seeked');
         that.captureImage(cloneVideo, annotBoxes);
-        if (!repeat) // safari fix
+        if (!repeat) // safari fix, skip first generated thumbnail
             counter++;
 
-        that.showThumbs(cloneVideo, counter, false);
+        that.showThumbs(cloneVideo, counter, false); // call until counter >= maxCounter
     });
 
 };
+
+/***********************************************************************
+ * createCopyVideo - clone video element to use for generating thumbs  *
+ ***********************************************************************/
 
 Player.prototype.createCopyVideo = function (mp4, webm, ogv) {
     var video;
@@ -189,8 +244,14 @@ Player.prototype.createCopyVideo = function (mp4, webm, ogv) {
     return video;
 };
 
+/***********************************************************************
+ * captureImage - capture one frame from the video                     *
+ ***********************************************************************/
+
 Player.prototype.captureImage = function (video, element) {
-    var canvas = document.createElement("canvas");
+    var canvas; // create canvas for capturing one frame from the video
+
+    canvas = document.createElement("canvas");
     canvas.width = 200;
     canvas.height = 100;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -200,21 +261,32 @@ Player.prototype.captureImage = function (video, element) {
     $(element).children('span').html(img);
 };
 
-Player.prototype.changeCurrentTime = function (time, fade) {
-    var fadeBox, that, dot, bar;
+/***********************************************************************
+ * changeCurrentTime - rewind to the new position with animations      *
+ ***********************************************************************/
 
+Player.prototype.changeCurrentTime = function (time, fade) {
+    var fadeBox, // element used to dispaly "loading..." message and fade in and out the video
+        that,    // variable used to address "this" in callback function
+        dot,     // main dot on progressbar
+        bar;     // progressbar
+
+    // animate progressbar and main dot on video rewinding
     dot = this.playerBox.getElementsByClassName('VP_dot')[0];
     bar = this.playerBox.getElementsByClassName('VP_progressBarIn')[0];
     $(dot).addClass('VP_transition');
     $(dot).on('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
         $(dot).removeClass('VP_transition');
+        $(dot).off('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd');
     });
 
     $(bar).addClass('VP_transition');
     $(bar).on('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
         $(bar).removeClass('VP_transition');
+        $(bar).off('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd');
     });
 
+    // if fade is enabled fade out and in video during rewinding 
     if (fade == true) {
         fadeBox = this.playerBox.getElementsByClassName('VP_fadeVideo')[0];
         
@@ -234,14 +306,24 @@ Player.prototype.changeCurrentTime = function (time, fade) {
     }
 };
 
+/***********************************************************************
+ * playBackPosition - rewind on progress bar click                     *
+ ***********************************************************************/
+
 Player.prototype.playBackPosition = function (e) {
 
-    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that, clickPosition, totalWidth, currentPosPerc, videoLength,
-        newVideoPos;
+    var timePlayBack,   // timestamp of the hotspot in seconds
+        url,            // new url to push
+        oldUrl,         // current url before change
+        parsed,         // parsed url
+        testLast,       // test if there is slash "/" in the end of the url
+        clickPosition,  // position of the click to detect where to rewind video
+        totalWidth,     // width od the progress bar
+        currentPosPerc, // click position in % in the progress bar
+        videoLength,    // total video duration
+        newVideoPos;    // new position in seconds where to rewind the video
     
     if (e.target !== e.currentTarget) {  // clicked on the hotspot dot
-        // add transition to time bar
-
         timePlayBack = e.target.getAttribute('time');
 
         this.changeCurrentTime(timePlayBack, true);
@@ -266,20 +348,28 @@ Player.prototype.playBackPosition = function (e) {
         }
 
         window.history.replaceState({p: url}, '', url);
+
     } else { // click on the progress bar
+        // calculate where to move according to click position
         clickPosition = e.pageX - $(e.currentTarget).offset().left;
         totalWidth = $(e.currentTarget).width();
         currentPosPerc = (100 / totalWidth) * clickPosition;
         videoLength = this.video.duration
         newVideoPos = (videoLength / 100) * currentPosPerc;
-        //this.video.currentTime = newVideoPos;
-        console.log('click:' + newVideoPos);
+        
+        // rewind to new position
         this.changeCurrentTime(newVideoPos, true);
     } 
 };
 
+/***********************************************************************
+ * checkUrl - on page load check video time stamp in url               *
+ ***********************************************************************/
+
 Player.prototype.checkUrl = function () {
-    var url, parsed, time;
+    var url,     // actual url
+        parsed,  // parsed url
+        time;    // timestamp of actual video position in url
 
     if (this.useHash) { // used hash in url
         url = window.location.hash;
@@ -287,7 +377,9 @@ Player.prototype.checkUrl = function () {
         if (parsed[0] == '#vpvideo') {
             if (parsed[1] == this.element) {
                 time = parseInt(parsed[2]);
-                this.video.currentTime = time;
+                if (time > 0 && time <= this.video.duration) {
+                    this.video.currentTime = time;
+                }
             }
         }
     } else { // hash not used in url
@@ -297,14 +389,23 @@ Player.prototype.checkUrl = function () {
         if (parsed[0] == 'vpvideo') { // there is a video tag in url
             if (parsed[1] == this.element) {
                 time = parseInt(parsed[2]);
-                this.video.currentTime = time;
+                if (time > 0 && time <= this.video.duration) {
+                    this.video.currentTime = time;
+                }
             }
         }
     }
 };
 
+/***********************************************************************
+ * annotOver - show hotspot details on mouse over                      *
+ ***********************************************************************/
+
 Player.prototype.annotOver = function (e) {
-    var timePlayBack, boxId, annotsBox;
+    var timePlayBack, 
+        boxId, 
+        annotsBox;
+
     if (e.target !== e.currentTarget) {
         timePlayBack = e.target.getAttribute('time');
         
@@ -315,8 +416,15 @@ Player.prototype.annotOver = function (e) {
     }
 };
 
+/***********************************************************************
+ * annotOut - hide hotspot details on mouse out                        *
+ ***********************************************************************/
+
 Player.prototype.annotOut = function (e) {
-    var timePlayBack, boxId, annotsBox;
+    var timePlayBack, 
+        boxId, 
+        annotsBox;
+
     if (e.target !== e.currentTarget) {
         timePlayBack = e.target.getAttribute('time');
         
@@ -327,21 +435,9 @@ Player.prototype.annotOut = function (e) {
     }
 };
 
-Player.prototype.addEvents = function () {
-    this.video.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
-    this.videoPlay.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
-    this.videoBg.onclick = (function (_this) { return function () { _this.playPause(); }; })(this);
-    this.video.addEventListener('timeupdate', (function (_this) { return function () { _this.progressBar(); }; })(this));
-    this.video.addEventListener('progress', (function (_this) { return function () { _this.loadProgress(); }; })(this));
-
-    this.video.addEventListener('loadedmetadata', ( function (_this) { return function () { 
-            _this.annotations();
-            _this.checkUrl();
-        }; })(this) 
-    );
-
-    this.video.addEventListener('ended', (function (_this) { return function () { _this.onVideoEnd(); }; })(this));
-};
+/***********************************************************************
+ * PlayPause                                                           *
+ ***********************************************************************/
 
 Player.prototype.playPause = function () {
     if(this.video.paused) {
@@ -356,6 +452,10 @@ Player.prototype.playPause = function () {
     }
 };
 
+/***********************************************************************
+ * loadProgress - render loading progress bar                          *
+ ***********************************************************************/
+
 Player.prototype.loadProgress = function () {
     var bar, actualPos;
 
@@ -369,6 +469,10 @@ Player.prototype.loadProgress = function () {
     bar.style.width = actualPos + '%';
 };
 
+/***********************************************************************
+ * progressBar                                                         *
+ ***********************************************************************/
+
 Player.prototype.progressBar = function () {
     var bar, actualPos, dot;
     dot = this.playerBox.getElementsByClassName('VP_dot')[0];
@@ -376,8 +480,11 @@ Player.prototype.progressBar = function () {
     actualPos = (this.video.currentTime / this.video.duration) * 100;
     bar.style.width = actualPos + '%';
     dot.style.left = actualPos + '%';
-
 };
+
+/***********************************************************************
+ * onVideoEnd                                                          *
+ ***********************************************************************/
 
 Player.prototype.onVideoEnd = function () {
     $(this.videoPlay).stop().fadeIn();
