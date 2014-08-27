@@ -128,15 +128,21 @@ Player.prototype.annotations = function () {
             '</div>';
     }, this);
     
-    
     annotElement.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
     annotElement.addEventListener('mouseover', (function (_this) { return function (e) { _this.annotOver(e); }; })(this));
     annotElement.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));    
 
-    this.showThumbs(0);
+    // clone video element and generate thumbnails
+    cloneVideo = this.createCopyVideo();
+    cloneVideo.load();
+
+    cloneVideo.addEventListener('loadedmetadata', ( function (_this) { return function () { 
+            _this.showThumbs(cloneVideo, 0);
+        }; })(this) 
+    );
 };
 
-Player.prototype.showThumbs = function (counter) {
+Player.prototype.showThumbs = function (cloneVideo, counter) {
     var maxCounter,
         annotBoxes,
         that;
@@ -144,24 +150,30 @@ Player.prototype.showThumbs = function (counter) {
     maxCounter = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0].getElementsByTagName('div').length;
 
     if (counter >= maxCounter) {
-        this.video.currentTime = 0;
+        cloneVideo.currentTime = 0;
         return;
     }
 
     annotBoxes = this.playerBox.getElementsByClassName('VP_annotsOneBox')[counter];
-    this.video.currentTime = annotBoxes.getAttribute('time');
+    cloneVideo.currentTime = annotBoxes.getAttribute('time');
 
     that = this;
-    $(this.video).on('seeked', function () {
-        $(that.video).off('seeked');
-        that.captureImage(that.video, annotBoxes);
+    $(cloneVideo).on('seeked', function () {
+        $(cloneVideo).off('seeked');
+        that.captureImage(cloneVideo, annotBoxes);
         counter++;
-        that.showThumbs(counter);
+        that.showThumbs(cloneVideo, counter);
     });
 };
 
-Player.prototype.captureImage = function (video, element) {
+Player.prototype.createCopyVideo = function () {
+    var video;
 
+    video = this.video.cloneNode(true);
+    return video;
+};
+
+Player.prototype.captureImage = function (video, element) {
     var canvas = document.createElement("canvas");
     canvas.width = 200;
     canvas.height = 100;
@@ -329,7 +341,12 @@ Player.prototype.loadProgress = function () {
     var bar, actualPos;
 
     bar = this.playerBox.getElementsByClassName('VP_progressBarLoad')[0];
-    actualPos = (this.video.buffered.end(0) / this.video.duration) * 100;
+
+    if(this.video.buffered.length != 0)
+        actualPos = (this.video.buffered.end(0) / this.video.duration) * 100;
+    else
+        actualPos = (0 / this.video.duration) * 100;
+
     bar.style.width = actualPos + '%';
 };
 
@@ -347,4 +364,5 @@ Player.prototype.onVideoEnd = function () {
     $(this.videoPlay).fadeIn();
     $(this.videoBg).fadeIn();
     this.changeCurrentTime(0, true);
+    this.video.pause();
 };
