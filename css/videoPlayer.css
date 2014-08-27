@@ -1,10 +1,10 @@
 video {
     display: block;
 }
-.videoBox {
+.VP_videoBox {
     position: relative;
 }
-.playButton {
+.VP_playButton {
     position: absolute;
     width: 200px;
     height: 200px;
@@ -17,7 +17,7 @@ video {
     background: url('/img/play.png') center center no-repeat;
     cursor: pointer;
 }
-.playBg {
+.VP_playBg {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -26,12 +26,12 @@ video {
     background: url('/img/bg.png') left top repeat;
     cursor: pointer;
 }
-.progressBar {
+.VP_progressBar {
     position: relative;
     width: 100%;
     height: 30px;
 }
-.dot {
+.VP_dot {
     position: absolute;
     width: 12px;
     height: 12px;
@@ -43,7 +43,7 @@ video {
     z-index: 4;
     background: url('/img/dot.png') center center no-repeat;
 }
-.annots {
+.VP_annots {
     position: absolute;
     width: 100%;
     height: 12px;
@@ -54,7 +54,7 @@ video {
     transform: translateY(-50%);
     z-index: 5;
 }
-.annots div {
+.VP_annots .VP_annotsDots {
     position: absolute;
     width: 12px;
     height: 12px;
@@ -66,7 +66,7 @@ video {
     transform: translate(-50%, -50%);
 }
 
-.progressBarIn {
+.VP_progressBarIn {
     position: absolute;
     width: 0%;
     height: 20%;
@@ -78,7 +78,7 @@ video {
     z-index: 3;
     background: #009900;        
 }
-.ProgressBarLoad {
+.VP_progressBarLoad {
     position: absolute;
     width: 0%;
     height: 20%;
@@ -90,7 +90,7 @@ video {
     z-index: 2;
     background: #ccc;
 }
-.progressBarBase {
+.VP_progressBarBase {
     position: absolute;
     width: 100%;
     height: 20%;
@@ -102,22 +102,41 @@ video {
     z-index: 1;
     background: #ddd;
 }
-.control {
+.VP_control {
     position: relative;
 }
 
-.annoutsBoxes {
+.VP_annoutsBoxes {
     position: absolute;
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
+    font-family: sans-serif;
+    color: #666;
+    font-size: 1em;
 }
-
-.annoutsBoxes div {
+.VP_annoutsBoxes div {
     position: absolute;
     bottom: 40px;
     background: #fff;
     padding: 10px;
     display: none;
+    z-index: 10;
+    border: solid 1px #ccc;
+    width: 206px;
+}
+.VP_annoutsBoxes span {
+    position: relative;
+    display: block;
+    width: 200px;
+    height: 100px;
+    border: solid 1px #ccc;
+    padding: 2px;
+}
+.VP_annoutsBoxes hr {
+    display: block;
+    background: none;
+    border: none;
+    border-bottom: solid 1px #ccc;
 }

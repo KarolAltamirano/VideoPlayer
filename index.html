@@ -4,6 +4,7 @@
   <title>Video Player</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="/css/videoPlayer.css">
+  <script src="/script/jquery-2.1.1.min.js"></script>
   <script src="/script/videoPlayer.js"></script>
 </head>
 
@@ -24,18 +25,19 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         annotations: [
             {
-                time: '00:00:10',
-                description: 'Ahoj video'
+                time: '00:00:15',
+                description: 'Random text 1 Random text 1 Random text 1'
             },
             {
-                time: '00:00:20',
-                description: 'hehehe'
+                time: '00:00:25',
+                description: 'Random text 2 Random text 2 Random text 2 Random text 2'
             },
             {
                 time: '00:00:40',
-                description: 'sprava'
+                description: 'Random text 3 Random text 3 Random text 3 Random text 3'
             }
-        ]
+        ],
+        useHash: true
     });
 });
 
