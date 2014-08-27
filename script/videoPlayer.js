@@ -121,8 +121,8 @@ Player.prototype.annotations = function () {
             '<div class="VP_annotsDots" time="' + seconds + '" style="left: ' + position + '%;"></div>';
     
         annotBoxes.innerHTML += 
-            '<div id="VP_' + this.element + '-' + seconds + '" style="left: ' + (position - 1.5) + '%">' + 
-                '<span id="VP_frame' + this.element + '-' + seconds + '"></span>' +
+            '<div class="VP_annotsOneBox" id="VP_' + this.element + '-' + seconds + '" style="left: ' + (position - 1.5) + '%" time="' + seconds + '">' + 
+                '<span></span>' +
                 '<hr>' +
                 e.description + 
             '</div>';
@@ -132,6 +132,47 @@ Player.prototype.annotations = function () {
     annotElement.addEventListener('click', (function (_this) { return function (e) { _this.playBackPosition(e); }; })(this));
     annotElement.addEventListener('mouseover', (function (_this) { return function (e) { _this.annotOver(e); }; })(this));
     annotElement.addEventListener('mouseout', (function (_this) { return function (e) { _this.annotOut(e); }; })(this));    
+
+    this.showThumbs(0);
+};
+
+Player.prototype.showThumbs = function (counter) {
+    var maxCounter,
+        annotBoxes,
+        that;
+
+    maxCounter = this.playerBox.getElementsByClassName('VP_annoutsBoxes')[0].getElementsByTagName('div').length;
+
+    console.log("max: " + maxCounter);
+    console.log("counter: " + counter);
+
+    if (counter >= maxCounter) {
+        this.video.currentTime = 0;
+        return;
+    }
+
+    annotBoxes = this.playerBox.getElementsByClassName('VP_annotsOneBox')[counter];
+    this.video.currentTime = annotBoxes.getAttribute('time');
+
+    that = this;
+    $(this.video).on('seeked', function () {
+        $(that.video).off('seeked');
+        that.captureImage(that.video, annotBoxes);
+        counter++;
+        that.showThumbs(counter);
+    });
+};
+
+Player.prototype.captureImage = function (video, element) {
+
+    var canvas = document.createElement("canvas");
+    canvas.width = 200;
+    canvas.height = 100;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    var img = document.createElement("img");
+    img.src = canvas.toDataURL();
+    $(element).children('span').html(img);
 };
 
 Player.prototype.playBackPosition = function (e) {
@@ -155,12 +196,12 @@ Player.prototype.playBackPosition = function (e) {
         fadeBox = this.playerBox.getElementsByClassName('VP_fadeVideo')[0];
         
         that = this;
-        $(this.video).animate({volume: 0}, 400);
-        $(fadeBox).fadeIn(400, function () { 
-            that.video.currentTime = timePlayBack;
+        $(this.video).animate({volume: 0}, 200);
+        this.video.currentTime = timePlayBack;
+        $(fadeBox).fadeIn(200, function () { 
             $(that.video).on('seeked', function () {
-                $(fadeBox).fadeOut(400);
-                $(that.video).animate({volume: 1}, 600);
+                $(fadeBox).fadeOut(500);
+                $(that.video).animate({volume: 1}, 1000);
             });
         });
 
