@@ -12,11 +12,13 @@
  * Player is global variable to create and manage the player                           *
  *  input =                                                                            *
  *      {                                                                              *
- *          element:     string, // main element where the player will be placed       *
- *          width:       number, // widt of the player                                 *
- *          src:         { mp4: string, webm: string, ogv: string}, // src to videos   *
- *          annotations: [ { time: string, description: string }, { ... }, ... ],      *
- *          useHash:     boolean // use hash in url or no, true / false                *
+ *          element:      string, // main element where the player will be placed      *
+ *          width:        number, // width of the player                               *
+ *          height:       number, // height of the player, not required                *
+ *          src:          { mp4: string, webm: string, ogv: string}, // src to videos  *
+ *          annotations:  [ { time: string, description: string }, { ... }, ... ],     *
+ *          useHash:      boolean, // use hash in url or no, true / false              *
+ *          onlyHotspots: boolean                                                      *
  *      }                                                                              *
  *                                                                                     *
  ***************************************************************************************/
@@ -44,10 +46,16 @@ var Player = function (input) {
         this.useHash = false;
     }
 
+    if (input.onlyHotspots === true) {
+        this.onlyHotspots = true;
+    } else {
+        this.onlyHotspots = false;
+    }
+
     this.element = input.element;
     this.annots = input.annotations;
     this.width = input.width;
-    
+    this.height = input.height || undefined; // not required variable 
     this.mp4  = input.src.mp4;
     this.webm = input.src.webm;
     this.ogv  = input.src.ogv;
@@ -99,8 +107,13 @@ Player.prototype.addEvents = function () {
 
 Player.prototype.cssStyle = function () {
     this.playerBox.style.position = 'relative';
-    this.playerBox.style.width = this.width + 'px';
-    this.video.style.width = this.width + 'px';
+    this.playerBox.style.width    = this.width + 'px';
+    this.video.style.width        = this.width + 'px';
+
+    if (this.height !== undefined) {
+        this.playerBox.style.height = this.height + 'px';
+        this.video.style.height     = this.height + 'px';
+    }
 };
 
 /***********************************************************************
@@ -218,9 +231,9 @@ Player.prototype.showThumbs = function (cloneVideo, counter, repeat) {
     $(cloneVideo).on('seeked', function () {
         $(cloneVideo).off('seeked');
         that.captureImage(cloneVideo, annotBoxes);
-        if (!repeat) // safari fix, skip first generated thumbnail
+        if (!repeat) { // safari fix, skip first generated thumbnail
             counter++;
-
+        }
         that.showThumbs(cloneVideo, counter, false); // call until counter >= maxCounter
     });
 
@@ -231,7 +244,7 @@ Player.prototype.showThumbs = function (cloneVideo, counter, repeat) {
  ***********************************************************************/
 
 Player.prototype.createCopyVideo = function (mp4, webm, ogv) {
-    var video;
+    var video, timeStamp;
 
     video = document.createElement('video');
     timeStamp = new Date().getTime();
@@ -350,6 +363,10 @@ Player.prototype.playBackPosition = function (e) {
         window.history.replaceState({p: url}, '', url);
 
     } else { // click on the progress bar
+        // progress bar enabled test
+        if (this.onlyHotspots) {
+            return;
+        }
         // calculate where to move according to click position
         clickPosition = e.pageX - $(e.currentTarget).offset().left;
         totalWidth = $(e.currentTarget).width();

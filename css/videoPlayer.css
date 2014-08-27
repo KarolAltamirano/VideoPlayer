@@ -35,7 +35,7 @@ video {
     background: #000;
     z-index: 4;
     display: none;
-    color: #fff;
+    color: #aaa;
 }
 .VP_fadeVideo span {
     position: relative;
@@ -138,7 +138,7 @@ video {
     left: 0;
     font-family: sans-serif;
     color: #666;
-    font-size: 0.8em;
+    font-size: 0.9em;
     text-align: justify;
 }
 .VP_annoutsBoxes div {
@@ -164,6 +164,7 @@ video {
     background: none;
     border: none;
     border-bottom: solid 1px #ccc;
+    margin: 5px 0;
 }
 .VP_transition {
     -webkit-transition-duration: 0.5s;

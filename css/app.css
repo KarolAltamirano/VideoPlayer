@@ -1,0 +1,11 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+#content {
+    position: relative;
+}
+#video_1 {
+    position: relative;
+    margin: 50px auto;    
+}
