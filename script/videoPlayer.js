@@ -83,6 +83,7 @@ Player.prototype.template = function (mp4, webm, ogv) {
             '</video>' +
             '<div class="VP_playButton"></div>' +
             '<div class="VP_playBg"></div>' +
+            '<div class="VP_fadeVideo"></div>' +
         '</div>' +
         '<div class="VP_control">' +
             '<div class="VP_progressBar">' +
@@ -134,10 +135,34 @@ Player.prototype.annotations = function () {
 };
 
 Player.prototype.playBackPosition = function (e) {
-    var timePlayBack, url, oldUrl, parsed, testLast;
+    var timePlayBack, url, oldUrl, parsed, testLast, bar, actualPos, dot, fadeBox, that;
     if (e.target !== e.currentTarget) {  // clicked on the annots dot
+        // add transition to time bar
+        dot = this.playerBox.getElementsByClassName('VP_dot')[0];
+        bar = this.playerBox.getElementsByClassName('VP_progressBarIn')[0];
+        $(dot).addClass('VP_transition');
+        dot.addEventListener('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
+            $(dot).removeClass('VP_transition');
+        });
+
+        $(bar).addClass('VP_transition');
+        bar.addEventListener('transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd', function () {
+            $(bar).removeClass('VP_transition');
+        });
+
         timePlayBack = e.target.getAttribute('time');
-        this.video.currentTime = timePlayBack;
+
+        fadeBox = this.playerBox.getElementsByClassName('VP_fadeVideo')[0];
+        
+        that = this;
+        $(this.video).animate({volume: 0}, 400);
+        $(fadeBox).fadeIn(400, function () { 
+            that.video.currentTime = timePlayBack;
+            $(that.video).on('seeked', function () {
+                $(fadeBox).fadeOut(400);
+                $(that.video).animate({volume: 1}, 600);
+            });
+        });
 
         // check and change url
         if (this.useHash) { // used hash in url
@@ -218,26 +243,23 @@ Player.prototype.addEvents = function () {
     this.video.addEventListener('timeupdate', (function (_this) { return function () { _this.progressBar(); }; })(this));
     this.video.addEventListener('progress', (function (_this) { return function () { _this.loadProgress(); }; })(this));
 
-    this.video.addEventListener('loadedmetadata', ( 
-        function (_this) { 
-            return function () { 
-                _this.annotations();
-                _this.checkUrl();
-            }; 
-        })(this)
+    this.video.addEventListener('loadedmetadata', ( function (_this) { return function () { 
+            _this.annotations();
+            _this.checkUrl();
+        }; })(this) 
     );
 };
 
 Player.prototype.playPause = function () {
     if(this.video.paused) {
-        this.videoPlay.style.display = 'none';
-        this.videoBg.style.display = 'none';
+        $(this.videoPlay).fadeOut();
+        $(this.videoBg).fadeOut();
         this.video.play();
     }
     else {
+        $(this.videoPlay).fadeIn();
+        $(this.videoBg).fadeIn();
         this.video.pause();
-        this.videoPlay.style.display = 'block';
-        this.videoBg.style.display = 'block';
     }
 };
 

@@ -26,6 +26,16 @@ video {
     background: url('/img/bg.png') left top repeat;
     cursor: pointer;
 }
+.VP_fadeVideo {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: #000;
+    z-index: 4;
+    display: none;
+}
 .VP_progressBar {
     position: relative;
     width: 100%;
@@ -114,7 +124,8 @@ video {
     left: 0;
     font-family: sans-serif;
     color: #666;
-    font-size: 1em;
+    font-size: 0.8em;
+    text-align: justify;
 }
 .VP_annoutsBoxes div {
     position: absolute;
@@ -139,4 +150,10 @@ video {
     background: none;
     border: none;
     border-bottom: solid 1px #ccc;
+}
+.VP_transition {
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
 }
