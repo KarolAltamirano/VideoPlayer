@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="/css/videoPlayer.css">
 ```
 
-    Place `videoPlayer.js` under `jquery.js`
+Place `videoPlayer.js` under `jquery.js`
 ```
 <script src="/script/jquery-2.1.1.min.js"></script>
 <script src="/script/videoPlayer.js"></script>
@@ -124,13 +124,13 @@ Type: `Object`
 
 Format:
 
-    ```javascript
+```
     src: {
-      mp4: 'url to video in mp4',
-      webm: 'url to video in webm',
-      ogv:  'url to video in ogv'
+        mp4: 'url to video in mp4',
+        webm: 'url to video in webm',
+        ogv:  'url to video in ogv'
     }
-    ```
+```
 
 Required
 
@@ -143,15 +143,15 @@ Type: `Array of objects`
 
 Format:
 
-    ```javascript
-        annotations: [
-           {
-              time: 'HH:MM:SS',
-              description: '...'
-           },
-           ...
-        ]
-    ```
+```
+    annotations: [
+       {
+          time: 'HH:MM:SS',
+          description: '...'
+       },
+       ...
+    ]
+```
 
 Optional
 
@@ -197,21 +197,21 @@ if set to `true` only by clicking on hotspot it is possible to go forward and ba
 ###HTML
 ```
     <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Video Player</title>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="/css/videoPlayer.css">
-        <link rel="stylesheet" href="/css/app.css">
-        <script src="/script/jquery-2.1.1.min.js"></script>
-        <script src="/script/videoPlayer.js"></script>
-        <script src="/script/app.js"></script>
-    </head>
-    <body>
-    <div id="content">
-        <div id="video_1"></div>
-    </div>
-    </body>
+        <html>
+        <head>
+            <title>Video Player</title>
+            <meta charset="UTF-8">
+            <link rel="stylesheet" href="/css/videoPlayer.css">
+            <link rel="stylesheet" href="/css/app.css">
+            <script src="/script/jquery-2.1.1.min.js"></script>
+            <script src="/script/videoPlayer.js"></script>
+            <script src="/script/app.js"></script>
+        </head>
+        <body>
+        <div id="content">
+            <div id="video_1"></div>
+        </div>
+        </body>
     </html>
 ```
 
