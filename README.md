@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="/css/videoPlayer.css">
 ```
 
-Place `videoPlayer.js` under `jquery.js`
+    Place `videoPlayer.js` under `jquery.js`
 ```
 <script src="/script/jquery-2.1.1.min.js"></script>
 <script src="/script/videoPlayer.js"></script>
@@ -50,47 +50,47 @@ Place `videoPlayer.js` under `jquery.js`
 ```
 
 ###7. Upload video to your project
-Create folder where you want to storage your videos and upload it there.
+    Create folder where you want to storage your videos and upload it there.
 
 
 ###8. Video Initialization 
 1. Open empty js file created in 6th step
 
 2. Create event `DOMContentLoaded`, player initialization write into created block
-```javascript
-    document.addEventListener('DOMContentLoaded', function () { 
-        /* Video Player initialization */
-    });
-```
+    ```javascript
+        document.addEventListener('DOMContentLoaded', function () { 
+            /* Video Player initialization */
+        });
+    ```
 
 3. Create player object
 
-```javascript
-    var player = new Player({
-        element: 'video_1',     /* set id of video container */
-        width: 700,             /* set width of the player */
-        src: {                  /* set urls to video files */
-            mp4:  '/videos/video.mp4',
-            webm: '/videos/video.webm',
-            ogv:  '/videos/video.ogv'
-        },
-        annotations: [  /* set time and description of all annotations */
-            {
-                time: '00:00:05',
-                description: '...'
+    ```javascript
+        var player = new Player({
+            element: 'video_1',     /* set id of video container */
+            width: 700,             /* set width of the player */
+            src: {                  /* set urls to video files */
+                mp4:  '/videos/video.mp4',
+                webm: '/videos/video.webm',
+                ogv:  '/videos/video.ogv'
             },
-            ...
-        ],
-        useHash: true, /* use hash in url or not */
-        onlyHotspots: false /* allow rewinding video only on hotspots */
-    });
-```
+            annotations: [  /* set time and description of all annotations */
+                {
+                    time: '00:00:05',
+                    description: '...'
+                },
+                ...
+            ],
+            useHash: true, /* use hash in url or not */
+            onlyHotspots: false /* allow rewinding video only on hotspots */
+        });
+    ```
 
 4. Done
 
 ##Options
-####element
 
+####element
 Type: `String`
 Required
 ID of video container in html file
@@ -108,29 +108,29 @@ Height of the video player in px
 
 ####src
 Type: `Object`
-Format: 
-```js
-src: {
-  mp4: 'url to video in mp4',
-  webm: 'url to video in webm',
-  ogv:  'url to video in ogv'
-}
-```
+Format:
+    ```javascript
+    src: {
+      mp4: 'url to video in mp4',
+      webm: 'url to video in webm',
+      ogv:  'url to video in ogv'
+    }
+    ```
 Required
 URLs to video
 
 ####annotations
 Type: `Array of objects`
 Format:
-```javascript
-annotations: [
-   {
-      time: 'HH:MM:SS',
-      description: '...'
-   },
-   ...
-]
-```
+    ```javascript
+        annotations: [
+           {
+              time: 'HH:MM:SS',
+              description: '...'
+           },
+           ...
+        ]
+    ```
 Optional
 Array of hotspots. Position of the hotspot in `time` and `description` of the hotspot
 
@@ -142,12 +142,12 @@ If `true` hash `#` will be added before video mark in URL. Example: `/#vpvideo-v
 
 #####Example of .htaccess
 ```
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ /index.html [QSA,L,B]
-</IfModule>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^(.*)$ /index.html [QSA,L,B]
+    </IfModule>
 ```
 
 ####onlyHotspots
@@ -158,62 +158,62 @@ if set to `true` only by clicking on hotspot it is possible to go forward and ba
 ##Code example
 
 ###HTML
-```h
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Video Player</title>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="/css/videoPlayer.css">
-  <link rel="stylesheet" href="/css/app.css">
-  <script src="/script/jquery-2.1.1.min.js"></script>
-  <script src="/script/videoPlayer.js"></script>
-  <script src="/script/app.js"></script>
-</head>
+    ```
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Video Player</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/videoPlayer.css">
+        <link rel="stylesheet" href="/css/app.css">
+        <script src="/script/jquery-2.1.1.min.js"></script>
+        <script src="/script/videoPlayer.js"></script>
+        <script src="/script/app.js"></script>
+    </head>
 
-<body>
-<div id="content">
-    <div id="video_1"></div>
-</div>
-</body>
+    <body>
+    <div id="content">
+        <div id="video_1"></div>
+    </div>
+    </body>
 
-</html>
-```
+    </html>
+    ```
+    
 ###JavaScript
 ```javascript
-document.addEventListener('DOMContentLoaded', function () {
-    var player = new Player({
-        element: 'video_1', 
-        width: 700,
-        src: {
-            mp4:  '/videos/trailer.mp4',
-            webm: '/videos/trailer.webm',
-            ogv:  '/videos/trailer.ogv'
-        },
-        annotations: [
-            {
-                time: '00:00:05',
-                description: 'An reque ceteros conclusionemque eam.'
+    document.addEventListener('DOMContentLoaded', function () {
+        var player = new Player({
+            element: 'video_1', 
+            width: 700,
+            src: {
+                mp4:  '/videos/trailer.mp4',
+                webm: '/videos/trailer.webm',
+                ogv:  '/videos/trailer.ogv'
             },
-            {
-                time: '00:00:25',
-                description: 'Ceteros omittantur has cu.'
-            },
-            {
-                time: '00:00:35',
-                description: 'Debet ocurreret id pri.'
-            },
-            {
-                time: '00:00:45',
-                description: 'Mel ad eius tritani.'
-            }
-        ],
-        useHash: true,
-        onlyHotspots: false
+            annotations: [
+                {
+                    time: '00:00:05',
+                    description: 'An reque ceteros conclusionemque eam.'
+                },
+                {
+                    time: '00:00:25',
+                    description: 'Ceteros omittantur has cu.'
+                },
+                {
+                    time: '00:00:35',
+                    description: 'Debet ocurreret id pri.'
+                },
+                {
+                    time: '00:00:45',
+                    description: 'Mel ad eius tritani.'
+                }
+            ],
+            useHash: true,
+            onlyHotspots: false
+        });
     });
-});
 ```
-
 
 ##Release History
 * 2014-08-28 v0.1 Initial release
