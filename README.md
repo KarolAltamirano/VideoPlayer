@@ -9,7 +9,7 @@
 ##How to install
 
 ###1. Download jQuery library and load it to your html file
-```h
+```
 <script src="/script/jquery-2.1.1.min.js"></script>
 ```
 
@@ -27,25 +27,25 @@
 
 ###4. Load css and js file to your html file
 
-```h
+```
 <link rel="stylesheet" href="/css/videoPlayer.css">
 ```
 
 Place `videoPlayer.js` under `jquery.js`
-```h
+```
 <script src="/script/jquery-2.1.1.min.js"></script>
 <script src="/script/videoPlayer.js"></script>
 ```
 
 ###5. Create container element for video player in body of your html file
 
-```h
+```
 <div id="video_1"></div>
 ```
 
 ###6. Create empty js file for Video Player initialization and load it to your html file
 
-```h
+```
 <script src="/script/app.js"></script>
 ```
 
@@ -57,14 +57,16 @@ Create folder where you want to storage your videos and upload it there.
 1. Open empty js file created in 6th step
 
 2. Create event `DOMContentLoaded`, player initialization write into created block
-   ```javascript
-   document.addEventListener('DOMContentLoaded', function () { 
-   /* Video Player initialization */
-   });
-   ```
+```javascript
+    document.addEventListener('DOMContentLoaded', function () { 
+        /* Video Player initialization */
+    });
+```
+
 3. Create player object
-   ```javascript
-var player = new Player({
+
+```javascript
+    var player = new Player({
         element: 'video_1',     /* set id of video container */
         width: 700,             /* set width of the player */
         src: {                  /* set urls to video files */
@@ -82,7 +84,8 @@ var player = new Player({
         useHash: true, /* use hash in url or not */
         onlyHotspots: false /* allow rewinding video only on hotspots */
     });
-   ```
+```
+
 4. Done
 
 ##Options
