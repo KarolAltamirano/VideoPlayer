@@ -90,25 +90,40 @@
 
 ##Options
 
+
 ####element
 Type: `String`
+
 Required
+
 ID of video container in html file
+
 
 ####width
 Type: `Number`
+
 Required
+
 Width of the video player in px
 
+
 ####height
+
 Type: `Number`
+
 Default: `auto`
+
 Optional
+
 Height of the video player in px
 
+
 ####src
+
 Type: `Object`
+
 Format:
+
     ```javascript
     src: {
       mp4: 'url to video in mp4',
@@ -116,12 +131,18 @@ Format:
       ogv:  'url to video in ogv'
     }
     ```
+
 Required
+
 URLs to video
 
+
 ####annotations
+
 Type: `Array of objects`
+
 Format:
+
     ```javascript
         annotations: [
            {
@@ -131,14 +152,23 @@ Format:
            ...
         ]
     ```
+
 Optional
+
+
 Array of hotspots. Position of the hotspot in `time` and `description` of the hotspot
 
+
 ####useHash
+
 Type: `Boolean`
+
 Default: `false`
+
 If `false` URL will be updated without `#` tag. In this case it is necessary to configure also `.htaccess` file on the server. Example: `/vpvideo-video_1-45`
+
 If `true` hash `#` will be added before video mark in URL. Example: `/#vpvideo-video_1-45`
+
 
 #####Example of .htaccess
 ```
@@ -150,15 +180,22 @@ If `true` hash `#` will be added before video mark in URL. Example: `/#vpvideo-v
     </IfModule>
 ```
 
+
 ####onlyHotspots
+
 Type: `Boolean`
+
 Default: `false`
+
 If set to `false` it is possible to go forward and back in video by clicking on hotspots or on any position in the progress bar.
+
 if set to `true` only by clicking on hotspot it is possible to go forward and back in video
+
+
 ##Code example
 
 ###HTML
-    ```
+```
     <!DOCTYPE html>
     <html>
     <head>
@@ -170,16 +207,14 @@ if set to `true` only by clicking on hotspot it is possible to go forward and ba
         <script src="/script/videoPlayer.js"></script>
         <script src="/script/app.js"></script>
     </head>
-
     <body>
     <div id="content">
         <div id="video_1"></div>
     </div>
     </body>
-
     </html>
-    ```
-    
+```
+
 ###JavaScript
 ```javascript
     document.addEventListener('DOMContentLoaded', function () {
