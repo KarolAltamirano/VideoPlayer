@@ -38,16 +38,15 @@ video {
     color: #aaa;
 }
 .VP_fadeVideo span {
-    position: relative;
+    position: absolute;
     display: block;
     width:200px;
-    margin: 0 auto;
     text-align: center;
     font-family: sans-serif;
     top: 50%;
-    -webkit-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
+    left: 50%;
+    margin-left: -100px;
+    margin-top: -5px;
     font-size: 1em;
 }
 .VP_progressBar {
